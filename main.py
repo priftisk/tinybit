@@ -1,14 +1,13 @@
 from core.model.base import Model
-from core.field.base import IntField
+from core.field.fields import IntField
 
 
 class User(Model):
-    id = IntField()
-    age = IntField()
+    id = IntField(default=1)
+    age = IntField(default=20)
 
 
-u = User()
-u.age = 10
-u.id = 1
-print()
-print(u)
+u = User(id="abc", age="x")
+
+print(u.errors)
+print(u.is_valid)

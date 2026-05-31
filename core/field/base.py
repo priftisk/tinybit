@@ -18,15 +18,16 @@ class Field(metaclass=FieldMeta):
             return self
         return instance.__dict__.get(self.name, self.default)
 
+    def __safe_set__(self, instance, value):
+        try:
+            self.validate(value)
+            instance.__dict__[self.name] = value
+
+        except Exception as e:
+            instance._errors[self.name] = str(e)
+
     def __set__(self, instance, value):
-        self.validate(value)
-        instance.__dict__[self.name] = value
+        self.__safe_set__(instance, value)
 
     def validate(self, value):
         pass
-
-
-class IntField(Field):
-    def validate(self, value):
-        if not isinstance(value, int):
-            raise TypeError("must be int")
