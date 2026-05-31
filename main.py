@@ -8,9 +8,15 @@ class User(Model):
     name = CharField(max_length=20)
 
 
-# u = User(id=3, age=20, name="Kostas")
-User.objects.filter(name="Kostas").filter(age=20)
-# User.objects.get(id=3)
+class Article(Model):
+    id = IntField()
+    title = CharField(max_length=140)
+    body = CharField(max_length=255)
 
-u, success = User.objects.create(id=1, name="Mario", age="5")
-print(u, success)
+
+user, created = User.objects.create(id=1, age=20, name="John")
+article, created = Article.objects.create(
+    id=12, title="The article title", body="The article body"
+)
+
+article.save()

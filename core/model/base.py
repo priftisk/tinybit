@@ -34,6 +34,9 @@ class Model(metaclass=ModelMeta):
     def errors(self):
         return self._errors
 
+    def save(self):
+        self.objects.save_to_db(self)
+
     def __repr__(self):
         field_str = ", ".join(
             f"{k}={getattr(self, k, None)!r}" for k in self.__class__._fields

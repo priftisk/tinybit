@@ -6,6 +6,9 @@ class QuerySet:
         self.model: Model = model
         self._filters = {}
 
+    def save_to_db(self, valid_model):
+        print(f"Commiting {valid_model} to db")
+
     def filter(self, **kwargs):
         for kw in kwargs.keys():
             if kw not in self.model._fields:
