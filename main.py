@@ -9,5 +9,6 @@ class User(Model):
 
 
 u = User(id=3, age=20, name="Kostas")
-User.objects.get(id=3)
+
+# u.get(id=3)
 # print(dir(User.objects))
