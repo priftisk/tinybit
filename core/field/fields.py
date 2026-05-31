@@ -5,14 +5,13 @@ class IntField(Field):
     def to_python(self, value):
         if value is None:
             return None
-
         if isinstance(value, int):
             return value
 
         try:
             return int(value)
         except (TypeError, ValueError):
-            raise TypeError("Cannot convert value to int")
+            raise TypeError(f"Cannot convert value {value} to int")
 
     def validate(self, value):
         if not isinstance(value, int):

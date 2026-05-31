@@ -17,5 +17,17 @@ class QuerySet:
         print(f"GET {id} from {self.model.__name__}")
         return None
 
+    def create(self, **kwargs) -> tuple[Model | None, bool]:
+        new: Model | None = None
+        valid = True
+        try:
+            new = self.model(**kwargs)
+            if not new.is_valid:
+                new = None
+                valid = False
+        except Exception as e:
+            raise e
+        return new, valid
+
     def all(self):
         return self

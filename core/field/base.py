@@ -25,6 +25,7 @@ class Field(metaclass=FieldMeta):
         try:
             value = self.to_python(value)
             self.validate(value)
+            # print(f"Setting {self.attr} to {value}")
             instance.__dict__[self.attr] = value
         except Exception as e:
             instance._errors[self.name] = str(e)
