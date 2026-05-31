@@ -1,5 +1,7 @@
 from core.field.base import Field
 
+from core.object_manager.base import ObjectManager
+
 
 def _make_model_init(fields: dict):
     def __init__(self, **kwargs):
@@ -22,6 +24,7 @@ class ModelMeta(type):
 
 
 class Model(metaclass=ModelMeta):
+    objects = ObjectManager()
 
     @property
     def is_valid(self):
