@@ -9,6 +9,5 @@ class User(Model):
 
 
 u = User(id=3, age=20, name="Kostas")
-
-# u.get(id=3)
-# print(dir(User.objects))
+User.objects.filter(name="Kostas").filter(age=20)
+User.objects.get(id=3)
