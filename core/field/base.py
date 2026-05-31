@@ -9,6 +9,9 @@ class Field(metaclass=FieldMeta):
     def __init__(self, default=None):
         self.default = default
 
+    def to_python(self, value):
+        return value
+
     def __set_name__(self, owner, name):
         self.name = name
         self.attr = f"_{name}"
@@ -16,18 +19,15 @@ class Field(metaclass=FieldMeta):
     def __get__(self, instance, owner):
         if instance is None:
             return self
-        return instance.__dict__.get(self.name, self.default)
-
-    def __safe_set__(self, instance, value):
-        try:
-            self.validate(value)
-            instance.__dict__[self.name] = value
-
-        except Exception as e:
-            instance._errors[self.name] = str(e)
+        return instance.__dict__.get(self.attr, self.default)
 
     def __set__(self, instance, value):
-        self.__safe_set__(instance, value)
+        try:
+            value = self.to_python(value)
+            self.validate(value)
+            instance.__dict__[self.attr] = value
+        except Exception as e:
+            instance._errors[self.name] = str(e)
 
     def validate(self, value):
         pass

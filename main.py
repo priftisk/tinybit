@@ -3,12 +3,11 @@ from core.field.fields import IntField, CharField
 
 
 class User(Model):
-    id = IntField(default=1)
-    age = IntField(default=20)
-    name = CharField(max_length=10, default="sbuiad")
+    id = IntField()
+    age = IntField()
 
 
-u = User()
+u = User(id="10", age=20)
 
-print(u.errors)
-print(u)
+print(u.id)  # 10 (int, not string)
+print(u.age)  # 20
