@@ -5,9 +5,9 @@ from core.field.fields import IntField, CharField
 class User(Model):
     id = IntField()
     age = IntField()
+    name = CharField(max_length=20)
 
 
-u = User(id="10", age=20)
-
-print(u.id)  # 10 (int, not string)
-print(u.age)  # 20
+u = User(id=3, age=20, name="Kostas")
+User.objects.filter(name="Kostas").filter(age=20)
+User.objects.get(id=3)
