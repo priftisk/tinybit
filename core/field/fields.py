@@ -16,7 +16,7 @@ class IntField(Field):
 
     def validate(self, value):
         if not isinstance(value, int):
-            raise TypeError("must be int")
+            raise TypeError("IntField must be int")
 
 
 class CharField(Field):
@@ -29,4 +29,9 @@ class CharField(Field):
             raise ValueError(
                 f"Value too long for Charfield(max_length={self.max_length})"
             )
-        return super().validate(value)
+
+
+class FloatField(Field):
+    def validate(self, value):
+        if not isinstance(value, float):
+            raise TypeError("FloatField must be float")
