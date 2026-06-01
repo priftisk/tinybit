@@ -1,4 +1,4 @@
-from .queryset import QuerySet
+from core.query.queryset import QuerySet
 
 
 class ObjectManager:

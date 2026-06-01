@@ -19,4 +19,5 @@ article, created = Article.objects.create(
     id=12, title="The article title", body="The article body"
 )
 
-article.save()
+u = User.objects.filter(id=1, name="dsad")
+u.get()

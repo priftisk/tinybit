@@ -13,18 +13,22 @@ def _make_model_init(fields: dict):
 
 
 class ModelMeta(type):
-
-    def __new__(cls, name, bases, namespace, /, **kwds):
+    def __new__(cls, name, bases, namespace, **kwds):
         _fields = {k: v for k, v in namespace.items() if isinstance(v, Field)}
+
         new_cls = super().__new__(cls, name, bases, namespace, **kwds)
+
         new_cls._fields = _fields
+        new_cls._table = (
+            name.lower() + "s" if "_table" not in namespace else namespace["_table"]
+        )
+        new_cls.objects = ObjectManager()
         new_cls.__init__ = _make_model_init(_fields)
 
         return new_cls
 
 
 class Model(metaclass=ModelMeta):
-    objects = ObjectManager()
 
     @property
     def is_valid(self):

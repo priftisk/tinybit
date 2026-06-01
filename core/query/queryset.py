@@ -1,9 +1,10 @@
-from core.model.base import *
+from core.query.query_builder import QueryBuilder
 
 
 class QuerySet:
     def __init__(self, model):
-        self.model: Model = model
+        self.model = model
+        self.data = []
         self._filters = {}
 
     def save_to_db(self, valid_model):
@@ -16,12 +17,14 @@ class QuerySet:
         self._filters.update(kwargs)
         return self  # For chaining
 
-    def get(self, id: int):
-        print(f"GET {id} from {self.model.__name__}")
-        return None
+    def get(self):
+        if not self.data:
+            qb = QueryBuilder(self.model, self._filters)
 
-    def create(self, **kwargs) -> tuple[Model | None, bool]:
-        new: Model | None = None
+        return self.data
+
+    def create(self, **kwargs):
+        new = None
         valid = True
         try:
             new = self.model(**kwargs)
