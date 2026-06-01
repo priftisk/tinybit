@@ -5,13 +5,8 @@ class Query:
         self._raw_string: str = self._construct_raw_string(filters)
 
     def _construct_raw_string(self, filters: dict) -> str:
-        s = "SELECT *"  # TODO use only() api for ObjectManager to specify columns
-        s += f"FROM {self._table}"
-        for name, val in filters.items():
-            print(name, val)
-
-        """
-        SELECT c1.CustomerName, c1.Country
-FROM Customer AS c1, Customer AS c2
-WHERE c1.Age = c2.Age AND c1.Country = c2.Country;
-        """
+        s = "SELECT *\n"  # TODO use only() api for ObjectManager to specify columns
+        s += f"FROM {self._table}\n"
+        s += f"WHERE {" ".join([f"{name}={val}" for name, val in filters.items()])}"  # TODO string values need quotes
+        s += ";"
+        return s

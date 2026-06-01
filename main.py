@@ -14,10 +14,13 @@ class Article(Model):
     body = CharField(max_length=255)
 
 
-user, created = User.objects.create(id=1, age=20, name="John")
-article, created = Article.objects.create(
-    id=12, title="The article title", body="The article body"
-)
+# user, created = User.objects.create(id=1, age=20, name="John")
+# article, created = Article.objects.create(
+#     id=12, title="The article title", body="The article body"
+# )
 
 u = User.objects.filter(id=1, name="dsad")
 u.get()
+
+a = Article.objects.filter(title="Some title")
+a.get()

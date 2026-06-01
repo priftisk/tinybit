@@ -20,6 +20,7 @@ class QuerySet:
     def get(self):
         if not self.data:
             qb = QueryBuilder(self.model, self._filters)
+            print(qb.query._raw_string)
 
         return self.data
 
