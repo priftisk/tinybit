@@ -12,6 +12,6 @@ def test_query_builds_basic_select():
 
     assert "SELECT *" in sql
     assert "FROM users" in sql
-    assert "id=1" in sql
-    assert "name=Alice" in sql
+    assert "id=?" in sql
+    assert "name=?" in sql
     assert sql.endswith(";")

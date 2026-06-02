@@ -3,8 +3,6 @@ from core.field.fields import IntField, CharField
 from core.db.setup import configure
 from core.db.sqlite_backend import SQLiteBackend
 
-configure(SQLiteBackend("tinybit.db"))
-
 
 class Article(Model):
     id = IntField()
@@ -18,8 +16,10 @@ class User(Model):
     age = IntField()
 
 
+configure(SQLiteBackend("tinybit.db"), create_tables=True)
+
 all_users = User.objects.all()
-some_users = User.objects.filter(age=20)
+some_users = User.objects.filter(age=22)
 print(all_users.get(), some_users.get())
 
 new_article, valid = Article.objects.create(id=1, title="Some title", body="Some body")

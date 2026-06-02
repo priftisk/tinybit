@@ -1,59 +1,76 @@
 from core.field.base import Field
 
+# class ModelBase(type):
+#     """
+#     Metaclass that:
+#       1. Collects Field descriptors into cls._fields at class creation time.
+#       2. Registers every concrete subclass of Model in ModelMeta._registry
+#          so configure() can iterate them and create their tables automatically.
+#       3. Attaches an ObjectManager as cls.objects.
+#     """
 
-class ModelBase(type):
-    """
-    Metaclass that:
-      1. Collects Field descriptors into cls._fields at class creation time.
-      2. Registers every concrete subclass of Model in ModelMeta._registry
-         so configure() can iterate them and create their tables automatically.
-      3. Attaches an ObjectManager as cls.objects.
-    """
+#     # All concrete Model subclasses register here at class-definition time.
+#     _registry: list = []
 
-    # All concrete Model subclasses register here at class-definition time.
-    _registry: list = []
+#     def __new__(mcs, name, bases, namespace):
+#         fields = {
+#             key: value for key, value in namespace.items() if isinstance(value, Field)
+#         }
 
-    def __new__(mcs, name, bases, namespace):
-        fields = {
-            key: value for key, value in namespace.items() if isinstance(value, Field)
-        }
+#         inherited_fields = {}
+#         for base in bases:
+#             if hasattr(base, "_fields"):
+#                 inherited_fields.update(base._fields)
 
+#         namespace["_fields"] = {**inherited_fields, **fields}
+#         namespace.setdefault("_table", f"{name.lower()}s")
+
+#         cls = super().__new__(mcs, name, bases, namespace)
+
+#         if name != "Model":
+#             mcs._registry.append(cls)
+
+#             from core.object_manager.base import ObjectManager
+
+#             cls.objects = ObjectManager(cls)
+
+#         return cls
+
+
+class Model:
+    _registry = []
+    _db = None
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+        # Collect inherited fields
         inherited_fields = {}
-        for base in bases:
+        for base in cls.__bases__:
             if hasattr(base, "_fields"):
                 inherited_fields.update(base._fields)
 
-        namespace["_fields"] = {**inherited_fields, **fields}
-        namespace.setdefault("_table", f"{name.lower()}s")
+        # Collect fields declared on this class
+        fields = {
+            key: value
+            for key, value in cls.__dict__.items()
+            if isinstance(value, Field)
+        }
 
-        cls = super().__new__(mcs, name, bases, namespace)
+        cls._fields = {**inherited_fields, **fields}
 
-        if name != "Model":
-            mcs._registry.append(cls)
+        if not hasattr(cls, "_table"):
+            cls._table = f"{cls.__name__.lower()}s"
 
-            from core.object_manager.base import ObjectManager
+        Model._registry.append(cls)
 
-            cls.objects = ObjectManager(cls)
+        from core.object_manager.base import ObjectManager
 
-        return cls
-
-
-class Model(metaclass=ModelBase):
-    """
-    Base class for all models.
-
-    _db is shared across the whole class hierarchy: setting Model._db
-    (via configure()) makes it visible on every subclass without having
-    to set it per-class.
-    """
-
-    _db = None  # set once by configure(); inherited by all subclasses
+        cls.objects = ObjectManager(cls)
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
-        self.is_valid: bool | None = None
-        self.errors: dict = {}
 
     def full_clean(self) -> bool:
         self.errors = {}
