@@ -31,19 +31,17 @@ def test_queryset_filter_chaining():
     assert qs._filters == {"id": 1, "name": "Alice"}
 
 
-def test_queryset_get_generates_query(capsys):
+def test_queryset_execute_returns_sql():
     class User(Model):
         id = IntField()
 
     qs = User.objects.filter(id=1)
 
-    qs.get()
+    result = qs.execute()
 
-    captured = capsys.readouterr().out
-
-    assert "SELECT *" in captured
-    assert "FROM users" in captured
-    assert "id=1" in captured
+    assert "SELECT *" in result
+    assert "FROM users" in result
+    assert "id=1" in result
 
 
 def test_queryset_create_returns_instance():
@@ -64,3 +62,14 @@ def test_queryset_all_returns_self():
     qs = User.objects.all()
 
     assert qs is qs
+
+
+def test_queryset_is_immutable():
+    class User(Model):
+        id = IntField()
+        age = IntField()
+        name = CharField(max_length=20)
+
+    q1 = User.objects.filter(id=1, name="Alice", age=25)
+    q2 = q1.filter(name="dada")
+    assert q1 is not q2

@@ -1,33 +1,38 @@
-from core.query.query_builder import QueryBuilder
+from core.query.query import Query
 
 
 class QuerySet:
-    def __init__(self, model):
+    def __init__(self, model, filters=None):
         self.model = model
-        self.data = []
-        self._filters = {}
+        self._filters = filters or {}
 
-    def save_to_db(self, valid_model):
-        print(f"Commiting {valid_model} to db")
+    # -------------------------
+    # internal helper
+    # -------------------------
+    def _clone(self, **kwargs):
+        return QuerySet(self.model, {**self._filters, **kwargs})
 
+    def _build_query(self):
+        return Query(self.model, self._filters)
+
+    # -------------------------
+    # public API
+    # -------------------------
     def filter(self, **kwargs):
-        for kw in kwargs.keys():
-            if kw not in self.model._fields:
-                raise ValueError(f"Unknown field {kw} for {self.model.__name__}")
-        self._filters.update(kwargs)
-        return self  # For chaining
+        for k in kwargs:
+            if k not in self.model._fields:
+                raise ValueError(f"Unknown field {k}")
+        return self._clone(**kwargs)
 
-    def get(self):
-        if not self.data:
-            qb = QueryBuilder(self.model, self._filters)
-            print(qb.query._raw_string)
-
-        return self.data
-
-    def create(self, **kwargs):
-        new = self.model(**kwargs)
-
-        return new, new.is_valid
+    def execute(self):
+        return str(self._build_query())
 
     def all(self):
-        return self
+        return self.execute()
+
+    def first(self):
+        return self.execute()
+
+    def create(self, **kwargs):
+        obj = self.model(**kwargs)
+        return obj, obj.is_valid
