@@ -11,7 +11,9 @@ class IntField(Field):
         try:
             return int(value)
         except (TypeError, ValueError):
-            raise TypeError(f"Cannot convert value {value} to int")
+            raise TypeError(
+                f"Cannot convert value {value} to int for field {self.name}"
+            )
 
     def validate(self, value):
         if not isinstance(value, int):
