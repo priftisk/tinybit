@@ -11,7 +11,7 @@ class Query:
         sql += f"FROM {self._table}\n"
 
         if filters:
-            sql += "WHERE " + " ".join(f"{k}={v}" for k, v in filters.items())
+            sql += "WHERE " + " AND ".join(f"{k}={v}" for k, v in filters.items())
 
         sql += ";"
         return sql

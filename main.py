@@ -1,5 +1,8 @@
 from core.model.base import Model
 from core.field.fields import IntField, CharField
+from core.backend.database import SQLiteBackend
+
+backend = SQLiteBackend("tinybit.db")
 
 
 class Article(Model):
@@ -11,8 +14,10 @@ class Article(Model):
 class User(Model):
     id = IntField()
     name = CharField(max_length=20)
+    age = IntField()
 
 
-qs = User.objects.filter(id=1).filter(name="Alice")
-
-print(qs.execute())
+qs = User.objects.all()
+print(qs)
+data = backend.select(qs)
+print(data)
