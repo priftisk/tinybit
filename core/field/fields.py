@@ -38,3 +38,12 @@ class FloatField(Field):
     def validate(self, value):
         if not isinstance(value, float):
             raise TypeError("FloatField must be float")
+
+
+class BoolField(Field):
+    def __init__(self, default=None, nullable=False):
+        super().__init__(default, nullable)
+
+    def validate(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("BoolField must be bool")

@@ -1,6 +1,6 @@
 import pytest
 from core.field.base import Field
-from core.field.fields import IntField, CharField
+from core.field.fields import IntField, CharField, BoolField
 
 
 def test_field_default_assignment():
@@ -25,7 +25,7 @@ def test_charfield_accepts_string():
 
 
 def test_intfield_rejects_invalid_value():
-    f = IntField()
+    f = IntField("not-an-int")
 
     class M:
         x = f
@@ -34,3 +34,15 @@ def test_intfield_rejects_invalid_value():
 
     with pytest.raises(Exception):
         m.x = "not-an-int"
+
+
+def test_boolfield_rejects_invalid_value():
+    f = BoolField("not-a-bool")
+
+    class M:
+        x = f
+
+    m = M()
+
+    with pytest.raises(Exception):
+        m.x = "not-a-bool"
