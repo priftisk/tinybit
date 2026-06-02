@@ -1,69 +1,90 @@
 from core.field.base import Field
 
-from core.object_manager.base import ObjectManager
 
-
-# Instance level responsibility
-def _make_model_init(fields: dict):
-    def __init__(self, **kwargs):
-        setattr(self, "_errors", {})
-        for name, field in fields.items():
-            setattr(self, name, kwargs.get(name, field.default))
-
-    return __init__
-
-
-# Class level responsibility
 class ModelBase(type):
-    def __new__(cls, name, bases, namespace, /, **kwds):
-        _fields = {}
+    """
+    Metaclass that:
+      1. Collects Field descriptors into cls._fields at class creation time.
+      2. Registers every concrete subclass of Model in ModelMeta._registry
+         so configure() can iterate them and create their tables automatically.
+      3. Attaches an ObjectManager as cls.objects.
+    """
 
+    # All concrete Model subclasses register here at class-definition time.
+    _registry: list = []
+
+    def __new__(mcs, name, bases, namespace):
+        fields = {
+            key: value for key, value in namespace.items() if isinstance(value, Field)
+        }
+
+        inherited_fields = {}
         for base in bases:
-            _fields.update(getattr(base, "_fields", {}))
+            if hasattr(base, "_fields"):
+                inherited_fields.update(base._fields)
 
-        _fields.update({k: v for k, v in namespace.items() if isinstance(v, Field)})
-        new_cls = super().__new__(cls, name, bases, namespace, **kwds)
-        new_cls._fields = _fields
-        new_cls._table = (
-            name.lower() + "s" if "_table" not in namespace else namespace["_table"]
-        )
-        new_cls.__init__ = _make_model_init(_fields)
-        new_cls.objects = ObjectManager()
+        namespace["_fields"] = {**inherited_fields, **fields}
+        namespace.setdefault("_table", f"{name.lower()}s")
 
-        return new_cls
+        cls = super().__new__(mcs, name, bases, namespace)
+
+        if name != "Model":
+            mcs._registry.append(cls)
+
+            from core.object_manager.base import ObjectManager
+
+            cls.objects = ObjectManager(cls)
+
+        return cls
 
 
 class Model(metaclass=ModelBase):
-    @property
-    def is_valid(self):
-        return len(self.errors) == 0
+    """
+    Base class for all models.
 
-    @property
-    def errors(self):
-        return self._errors
+    _db is shared across the whole class hierarchy: setting Model._db
+    (via configure()) makes it visible on every subclass without having
+    to set it per-class.
+    """
 
-    def full_clean(self):
-        self._errors = {}
+    _db = None  # set once by configure(); inherited by all subclasses
 
-        for name, field in self._fields.items():
-            value = getattr(self, name)
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        self.is_valid: bool | None = None
+        self.errors: dict = {}
 
+    def full_clean(self) -> bool:
+        self.errors = {}
+        for name, field in self.__class__._fields.items():
+            value = getattr(self, name, None)
             try:
                 field.validate(value)
             except Exception as e:
-                self._errors[name] = str(e)
+                self.errors[name] = str(e)
+        return not self.errors
 
-        return not self._errors
-
-    def save(self):
-        self.objects.save_to_db(self)
-
-    def __repr__(self):
-        field_str = ", ".join(
-            f"{k}={getattr(self, k, None)!r}" for k in self.__class__._fields
+    def save(self) -> None:
+        if not self.full_clean():
+            raise Exception(self.errors)
+        db = self.__class__._db
+        if db is None:
+            raise RuntimeError(
+                "No backend configured. Call configure() before calling save()."
+            )
+        data = self.to_dict()
+        cols = ", ".join(data.keys())
+        placeholders = ", ".join(["?"] * len(data))
+        table = self.__class__.__name__.lower() + "s"
+        db.execute(
+            f"INSERT INTO {table} ({cols}) VALUES ({placeholders})",
+            tuple(data.values()),
         )
-        return f"<{self.__class__.__name__}({field_str})>"
 
     def to_dict(self) -> dict:
+        return {name: getattr(self, name, None) for name in self.__class__._fields}
 
-        return {name: getattr(self, name) for name, _ in self._fields.items()}
+    def __repr__(self):
+        fields = ", ".join(f"{k}={v!r}" for k, v in self.to_dict().items())
+        return f"{self.__class__.__name__}({fields})"

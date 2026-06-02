@@ -37,7 +37,7 @@ def test_queryset_execute_returns_sql():
 
     qs = User.objects.filter(id=1)
 
-    result = qs.execute()
+    result = qs.execute().raw
 
     assert "SELECT *" in result
     assert "FROM users" in result

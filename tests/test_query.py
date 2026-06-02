@@ -8,7 +8,7 @@ def test_query_builds_basic_select():
 
     q = Query(FakeModel, {"id": 1, "name": "Alice"})
 
-    sql = str(q)
+    sql = str(q.raw)
 
     assert "SELECT *" in sql
     assert "FROM users" in sql

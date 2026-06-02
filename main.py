@@ -1,5 +1,9 @@
 from core.model.base import Model
 from core.field.fields import IntField, CharField
+from core.db.setup import configure
+from core.db.sqlite_backend import SQLiteBackend
+
+configure(SQLiteBackend("tinybit.db"))
 
 
 class Article(Model):
@@ -11,8 +15,12 @@ class Article(Model):
 class User(Model):
     id = IntField()
     name = CharField(max_length=20)
+    age = IntField()
 
 
-qs = User.objects.filter(id=1).filter(name="Alice")
+all_users = User.objects.all()
+some_users = User.objects.filter(age=20)
+print(all_users.get(), some_users.get())
 
-print(qs.execute())
+new_article, valid = Article.objects.create(id=1, title="Some title", body="Some body")
+new_article.save()  # Saves to db
