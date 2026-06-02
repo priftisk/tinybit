@@ -173,7 +173,7 @@ WHERE id=1 name=Alice;
 
 ---
 
-## QueryBuilder
+## QueryBuilder (Currently unused)
 
 Responsible for constructing and caching queries.
 
