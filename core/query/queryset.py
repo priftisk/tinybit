@@ -2,9 +2,9 @@ from core.query.query import Query
 
 
 class QuerySet:
-    def __init__(self, model, filters=None):
+    def __init__(self, model, filters={}):
         self.model = model
-        self._filters = filters or {}
+        self._filters = filters
 
     # -------------------------
     # internal helper
@@ -24,14 +24,23 @@ class QuerySet:
                 raise ValueError(f"Unknown field {k}")
         return self._clone(**kwargs)
 
-    def execute(self):
-        return str(self._build_query())
+    def get(self) -> list:
+        db = self.model._db
+        if db is None:
+            raise RuntimeError(
+                f"No backend configured. Call configure() before querying {self.model.__name__}."
+            )
+        query = self._build_query()
+
+        rows = db.execute(query.raw, tuple(self._filters.values()))
+
+        return [self.model(**row) for row in rows]
 
     def all(self):
-        return self.execute()
+        return self._clone()
 
-    def first(self):
-        return self.execute()
+    def execute(self):
+        return self._build_query()
 
     def create(self, **kwargs):
         obj = self.model(**kwargs)

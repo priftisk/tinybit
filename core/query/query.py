@@ -1,17 +1,16 @@
 class Query:
     def __init__(self, model, filters: dict):
-        self._table = model._table
+        self._model = model
         self._raw_string = self._build(filters)
 
-    def __str__(self):
+    @property
+    def raw(self):
         return self._raw_string
 
+    # def __str__(self):
+    #     return self._raw_string
+
     def _build(self, filters):
-        sql = "SELECT *\n"
-        sql += f"FROM {self._table}\n"
-
-        if filters:
-            sql += "WHERE " + " AND ".join(f"{k}={v}" for k, v in filters.items())
-
-        sql += ";"
+        where = " AND ".join(f"{k}=?" for k in filters)
+        sql = f"SELECT * FROM {self._model._table} WHERE {where}"
         return sql

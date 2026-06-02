@@ -1,8 +1,9 @@
 from core.model.base import Model
 from core.field.fields import IntField, CharField
-from core.backend.database import SQLiteBackend
+from core.db.setup import configure
+from core.db.sqlite_backend import SQLiteBackend
 
-backend = SQLiteBackend("tinybit.db")
+configure(SQLiteBackend("tinybit.db"))
 
 
 class Article(Model):
@@ -17,7 +18,6 @@ class User(Model):
     age = IntField()
 
 
-qs = User.objects.all()
-print(qs)
-data = backend.select(qs)
-print(data)
+# print(User._registry)
+new_user = User.objects.all().get()
+print(new_user)
