@@ -257,9 +257,9 @@ User.objects.all()
 * No result hydration into models
 * No SQL parameter binding
 * No AND/OR grouping in filters
-* No column selection (`only()`)
+* No column selection (currently always queries all columns)
 * No query result caching
-* No backend abstraction (SQLite/Postgres/etc.)
+* No backend abstraction
 
 
 ## Testing
