@@ -34,14 +34,6 @@ class ModelBase(type):
 
 
 class Model(metaclass=ModelBase):
-
-    def __init__(self, **kwargs):
-        self._errors = {}
-
-        for name, field in self._fields.items():
-            value = kwargs.get(name, field.default)
-            setattr(self, name, value)
-
     @property
     def is_valid(self):
         return len(self.errors) == 0
