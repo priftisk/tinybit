@@ -16,7 +16,6 @@ class SQLiteBackend(DatabaseBackend):
 
     def execute(self, sql: str, params: tuple = ()) -> list[dict]:
         cur = self.conn.execute(sql, params)
-        self.conn.commit()
         rows = cur.fetchall()
         return [dict(r) for r in rows] if rows else []
 

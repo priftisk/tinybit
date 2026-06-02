@@ -18,6 +18,9 @@ class User(Model):
     age = IntField()
 
 
-# print(User._registry)
-new_user = User.objects.all().get()
-print(new_user)
+all_users = User.objects.all()
+some_users = User.objects.filter(age=20)
+print(all_users.get(), some_users.get())
+
+new_article, valid = Article.objects.create(id=1, title="Some title", body="Some body")
+new_article.save()  # Saves to db

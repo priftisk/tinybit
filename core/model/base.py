@@ -14,26 +14,21 @@ class ModelBase(type):
     _registry: list = []
 
     def __new__(mcs, name, bases, namespace):
-        # Collect fields defined directly on this class
         fields = {
             key: value for key, value in namespace.items() if isinstance(value, Field)
         }
 
-        # Merge inherited fields
         inherited_fields = {}
         for base in bases:
             if hasattr(base, "_fields"):
                 inherited_fields.update(base._fields)
 
         namespace["_fields"] = {**inherited_fields, **fields}
-
-        # Generate table name if not explicitly provided
         namespace.setdefault("_table", f"{name.lower()}s")
 
         cls = super().__new__(mcs, name, bases, namespace)
 
-        # Register every subclass except the root Model class
-        if any(hasattr(base, "_fields") for base in bases):
+        if name != "Model":
             mcs._registry.append(cls)
 
             from core.object_manager.base import ObjectManager
