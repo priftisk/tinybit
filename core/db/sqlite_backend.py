@@ -7,11 +7,11 @@ _TYPE_MAP = {
     CharField: "TEXT",
 }
 
+# SQLite will create a temporary db in memory
 _SQLITE_TEMP_INMEMORY = ":memory:"
 
 
 class SQLiteBackend(DatabaseBackend):
-    # SQLite will create a temporary db in memory
     def __init__(self, path: str = _SQLITE_TEMP_INMEMORY):
         self.conn = sqlite3.connect(path)
         self.conn.row_factory = (
@@ -20,6 +20,7 @@ class SQLiteBackend(DatabaseBackend):
 
     def execute(self, sql: str, params: tuple = ()) -> list[dict]:
         cur = self.conn.execute(sql, params)
+        self.conn.commit()
         rows = cur.fetchall()
         return [dict(r) for r in rows] if rows else []
 
