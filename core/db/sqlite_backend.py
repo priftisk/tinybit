@@ -7,12 +7,16 @@ _TYPE_MAP = {
     CharField: "TEXT",
 }
 
+_SQLITE_TEMP_INMEMORY = ":memory:"
+
 
 class SQLiteBackend(DatabaseBackend):
-
-    def __init__(self, path: str = ":memory:"):
+    # SQLite will create a temporary db in memory
+    def __init__(self, path: str = _SQLITE_TEMP_INMEMORY):
         self.conn = sqlite3.connect(path)
-        self.conn.row_factory = sqlite3.Row
+        self.conn.row_factory = (
+            sqlite3.Row
+        )  # Returns data["field"] instead of data[index]
 
     def execute(self, sql: str, params: tuple = ()) -> list[dict]:
         cur = self.conn.execute(sql, params)
