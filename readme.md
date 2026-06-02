@@ -50,7 +50,7 @@ project/
 │   ├── test_inheritance.py
 │   ├── test_to_dict.py
 │   └── test_query.py
-│
+├── Makefile
 └── README.md
 ```
 
@@ -69,7 +69,7 @@ pip install pytest
 ## Running Tests
 
 ```bash id="b9q1ds"
-pytest
+make test
 ```
 
 Verbose:
@@ -262,12 +262,5 @@ User.objects.all()
 * No backend abstraction
 
 
-## Testing
-
-Run all tests:
-
-```bash id="p1q8zm"
-pytest
-```
 
 
