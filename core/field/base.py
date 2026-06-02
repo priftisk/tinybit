@@ -1,18 +1,24 @@
-class FieldMeta(type):
-    def __new__(cls, name, bases, namespace):
-        if name != "Field" and "validate" not in namespace:
-            raise TypeError(f"{name} is missing validate()")
-        return super().__new__(cls, name, bases, namespace)
+from abc import ABC, abstractmethod
+from core.exception.base import ValidationError
 
 
-class Field(metaclass=FieldMeta):
-    def __init__(self, default=None):
+class Field(ABC):
+    def __init__(self, default=None, nullable=False):
         self.default = default
+        self.nullable = nullable
+
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+
+        if cls.validate is Field.validate:
+            raise TypeError(f"{cls.__name__} must implement validate()")
 
     def to_python(self, value):
         return value
 
     def __set_name__(self, owner, name):
+        if hasattr(self, "name"):
+            raise RuntimeError("Field instances cannot be reused")
         self.name = name
         self.attr = f"_{name}"
 
@@ -22,13 +28,14 @@ class Field(metaclass=FieldMeta):
         return instance.__dict__.get(self.attr, self.default)
 
     def __set__(self, instance, value):
-        try:
-            value = self.to_python(value)
-            self.validate(value)
-            # print(f"Setting {self.attr} to {value}")
-            instance.__dict__[self.attr] = value
-        except Exception as e:
-            instance._errors[self.name] = str(e)
+        if not self.nullable and value is None:
+            raise ValueError(
+                f"{instance.__class__.__name__}:{self.name} cannot be None."
+            )
+        value = self.to_python(value)
+        self.validate(value)
+        instance.__dict__[self.attr] = value
 
+    @abstractmethod
     def validate(self, value):
         pass

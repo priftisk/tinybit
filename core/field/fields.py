@@ -11,7 +11,9 @@ class IntField(Field):
         try:
             return int(value)
         except (TypeError, ValueError):
-            raise TypeError(f"Cannot convert value {value} to int")
+            raise TypeError(
+                f"Cannot convert value {value} to int for field {self.name}"
+            )
 
     def validate(self, value):
         if not isinstance(value, int):
@@ -24,6 +26,8 @@ class CharField(Field):
         super().__init__(default)
 
     def validate(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Charfield must be str")
         if len(value) > self.max_length:
             raise ValueError(
                 f"Value too long for Charfield(max_length={self.max_length})"
