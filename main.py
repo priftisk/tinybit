@@ -14,6 +14,5 @@ class Article(Model):
     body = CharField(max_length=255)
 
 
-user, created = User.objects.create(id=1, age=31, name=33)
-user.full_clean()
-user.save()
+user = User(id=1, name="Alice", age=25)
+print(user)

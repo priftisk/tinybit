@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from core.exception.base import ValidationError
 
 
 class Field(ABC):

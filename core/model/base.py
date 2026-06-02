@@ -3,17 +3,17 @@ from core.field.base import Field
 from core.object_manager.base import ObjectManager
 
 
+# Instance level responsibility
 def _make_model_init(fields: dict):
     def __init__(self, **kwargs):
         setattr(self, "_errors", {})
-        if not hasattr(self, "_table"):
-            self._table = self.__class__.__name__.lower() + "s"
         for name, field in fields.items():
             setattr(self, name, kwargs.get(name, field.default))
 
     return __init__
 
 
+# Class level responsibility
 class ModelBase(type):
     def __new__(cls, name, bases, namespace, /, **kwds):
         _fields = {}
@@ -24,6 +24,9 @@ class ModelBase(type):
         _fields.update({k: v for k, v in namespace.items() if isinstance(v, Field)})
         new_cls = super().__new__(cls, name, bases, namespace, **kwds)
         new_cls._fields = _fields
+        new_cls._table = (
+            name.lower() + "s" if "_table" not in namespace else namespace["_table"]
+        )
         new_cls.__init__ = _make_model_init(_fields)
         new_cls.objects = ObjectManager()
 
