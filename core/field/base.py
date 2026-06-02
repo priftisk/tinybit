@@ -1,13 +1,12 @@
-class FieldMeta(type):
-    def __new__(cls, name, bases, namespace):
-        if name != "Field" and "validate" not in namespace:
-            raise TypeError(f"{name} is missing validate()")
-        return super().__new__(cls, name, bases, namespace)
-
-
-class Field(metaclass=FieldMeta):
+class Field:
     def __init__(self, default=None):
         self.default = default
+
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+
+        if cls.validate is Field.validate:
+            raise TypeError(f"{cls.__name__} must implement validate()")
 
     def to_python(self, value):
         return value

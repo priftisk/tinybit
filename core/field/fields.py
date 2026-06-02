@@ -24,6 +24,8 @@ class CharField(Field):
         super().__init__(default)
 
     def validate(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Charfield must be str")
         if len(value) > self.max_length:
             raise ValueError(
                 f"Value too long for Charfield(max_length={self.max_length})"

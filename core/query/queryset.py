@@ -25,16 +25,9 @@ class QuerySet:
         return self.data
 
     def create(self, **kwargs):
-        new = None
-        valid = True
-        try:
-            new = self.model(**kwargs)
-            if not new.is_valid:
-                new = None
-                valid = False
-        except Exception as e:
-            raise e
-        return new, valid
+        new = self.model(**kwargs)
+
+        return new, new.is_valid
 
     def all(self):
         return self

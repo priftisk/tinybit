@@ -12,23 +12,17 @@ def _make_model_init(fields: dict):
     return __init__
 
 
-class ModelMeta(type):
-    def __new__(cls, name, bases, namespace, **kwds):
-        _fields = {k: v for k, v in namespace.items() if isinstance(v, Field)}
+class Model:
+    def __init_subclass__(cls):
+        super().__init_subclass__()
 
-        new_cls = super().__new__(cls, name, bases, namespace, **kwds)
+        cls._fields = {k: v for k, v in cls.__dict__.items() if isinstance(v, Field)}
 
-        new_cls._fields = _fields
-        new_cls._table = (
-            name.lower() + "s" if "_table" not in namespace else namespace["_table"]
-        )
-        new_cls.objects = ObjectManager()
-        new_cls.__init__ = _make_model_init(_fields)
+        if not hasattr(cls, "_table"):
+            cls._table = cls.__name__.lower() + "s"
 
-        return new_cls
-
-
-class Model(metaclass=ModelMeta):
+        cls.objects = ObjectManager()
+        cls.__init__ = _make_model_init(cls._fields)
 
     @property
     def is_valid(self):
