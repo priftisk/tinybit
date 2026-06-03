@@ -1,11 +1,8 @@
 import sqlite3
 from .backend import DatabaseBackend
-from core.field.fields import IntField, CharField
+from core.field.fields import IntField, CharField, FloatField
 
-_TYPE_MAP = {
-    IntField: "INTEGER",
-    CharField: "TEXT",
-}
+_TYPE_MAP = {IntField: "INTEGER", CharField: "TEXT", FloatField: "REAL"}
 
 # SQLite will create a temporary db in memory
 _SQLITE_TEMP_INMEMORY = ":memory:"
