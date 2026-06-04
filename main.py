@@ -30,3 +30,18 @@ print(all_users.get(), some_users.get())
 
 new_article, valid = Article.objects.create(id=1, title="Some title", body="Some body")
 new_article.save()  # Saves to db
+
+
+from core.util.parsers import from_csv
+
+
+class LogLine(Model):
+    _table = None
+    # id = IntField()
+    datetime = CharField(max_length=100)
+    level = CharField(max_length=20)
+    message = CharField(max_length=255)
+
+
+data = from_csv(LogLine, "fake_logs.csv")
+print(data[0])

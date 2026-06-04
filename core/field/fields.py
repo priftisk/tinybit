@@ -30,7 +30,7 @@ class CharField(Field):
             raise TypeError("Charfield must be str")
         if len(value) > self.max_length:
             raise ValueError(
-                f"Value too long for Charfield(max_length={self.max_length})"
+                f"Value: {value} is too long for Charfield(max_length={self.max_length})"
             )
 
 
