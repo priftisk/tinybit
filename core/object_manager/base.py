@@ -20,6 +20,4 @@ class ObjectManager:
     def create(self, **kwargs):
         instance = self.model(**kwargs)
         is_valid = instance.full_clean()
-        if is_valid:
-            instance.save()
         return instance, is_valid
