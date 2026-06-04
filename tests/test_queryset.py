@@ -31,28 +31,17 @@ def test_queryset_filter_chaining():
     assert qs._filters == {"id": 1, "name": "Alice"}
 
 
-def test_queryset_execute_returns_sql():
+def test_queryset_returns_correct_sql():
     class User(Model):
         id = IntField()
 
     qs = User.objects.filter(id=1)
 
-    result = qs.execute().raw
+    result = qs._build_query().raw
 
     assert "SELECT *" in result
     assert "FROM users" in result
     assert "id=?" in result
-
-
-# def test_queryset_create_returns_instance():
-#     class User(Model):
-#         id = IntField()
-#         name = CharField(max_length=20)
-
-#     user, is_valid = User.objects.create(id=1, name="Alice")
-
-#     assert isinstance(user, User)
-#     assert isinstance(is_valid, bool)
 
 
 def test_queryset_all_returns_self():

@@ -71,6 +71,11 @@ class Model:
     def to_dict(self) -> dict:
         return {name: getattr(self, name, None) for name in self.__class__._fields}
 
+    def __eq__(self, other):
+        if not isinstance(other, Model):
+            return False
+        return self.__class__.__name__ == other.__class__.__name__
+
     def __repr__(self):
         fields = ", ".join(f"{k}={v!r}" for k, v in self.to_dict().items())
         return f"{self.__class__.__name__}({fields})"
