@@ -2,18 +2,27 @@ from core.query.query import Query
 
 
 class QuerySet:
-    def __init__(self, model, filters={}):
+    def __init__(self, model, filters={}, _only=set()):
         self.model = model
         self._filters = filters
+        self._only = _only
 
     # -------------------------
     # internal helper
     # -------------------------
     def _clone(self, **kwargs):
-        return QuerySet(self.model, {**self._filters, **kwargs})
+        included_fields = self._only
+        if "_only" in kwargs:
+            included_fields = kwargs.get("_only", self._only)
+            _ = kwargs.pop("_only")
+        return QuerySet(
+            self.model,
+            {**self._filters, **kwargs},
+            included_fields,
+        )
 
     def _build_query(self):
-        return Query(self.model, self._filters)
+        return Query(self.model, self._filters, self._only)
 
     # -------------------------
     # public API
@@ -35,6 +44,10 @@ class QuerySet:
         rows = db.execute(query.raw, tuple(self._filters.values()))
 
         return [self.model(**row) for row in rows]
+
+    def only(self, *args):
+        return self._clone(_only=args)
+        # self._only.add(next(arg for arg in args))
 
     def first(self):
         return self.all().get()[0]

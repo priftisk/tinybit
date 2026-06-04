@@ -14,6 +14,9 @@ class ObjectManager:
     def first(self):
         return QuerySet(self.model).first()
 
+    def only(self, *args):
+        return QuerySet(self.model).only(*args)
+
     def create(self, *args, **kwargs):
         if args and not kwargs:
             raise Exception(
