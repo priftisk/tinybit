@@ -11,14 +11,17 @@ class QuerySet:
     # internal helper
     # -------------------------
     def _clone(self, **kwargs):
-        included_fields = self._only
-        if "_only" in kwargs:
-            included_fields = kwargs.get("_only", self._only)
+        included_cols = self._only
+
+        if (
+            "_only" in kwargs
+        ):  # Extract and remove it so it does not get added to the filters
+            included_cols = kwargs.get("_only", self._only)
             _ = kwargs.pop("_only")
         return QuerySet(
             self.model,
             {**self._filters, **kwargs},
-            included_fields,
+            included_cols,
         )
 
     def _build_query(self):
@@ -39,11 +42,14 @@ class QuerySet:
             raise RuntimeError(
                 f"No backend configured. Call configure() before querying {self.model.__name__}."
             )
+
         query = self._build_query()
-
         rows = db.execute(query.raw, tuple(self._filters.values()))
-
-        return [self.model(**row) for row in rows]
+        if self._only == set():  # All columns
+            return [self.model(**row) for row in rows]
+        return [
+            {**row} for row in rows
+        ]  # TODO For now it returns just a dict (Maybe wrap in something)
 
     def only(self, *args):
         return self._clone(_only=args)

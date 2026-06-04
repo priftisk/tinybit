@@ -8,7 +8,7 @@ class Query:
         return self._raw_string
 
     def _build(self, filters, columns):
-        cols = "*" if not columns else " ,".join(col for col in columns)
+        cols = "*" if columns == set() else " ,".join(col for col in columns)
         sql = f"SELECT {cols} FROM {self._model._table}\n"
         where = " AND ".join(f"{k}=?" for k in filters)
         if where:
