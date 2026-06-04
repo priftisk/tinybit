@@ -17,7 +17,11 @@ class ObjectManager:
     def first(self):
         return QuerySet(self.model).first()
 
-    def create(self, **kwargs):
+    def create(self, *args, **kwargs):
+        if args and not kwargs:
+            raise Exception(
+                f"{self.__class__.__name__}.create() must use keyword arguments."
+            )
         instance = self.model(**kwargs)
         is_valid = instance.full_clean()
         return instance, is_valid

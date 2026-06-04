@@ -3,6 +3,29 @@
 A lightweight Python ORM-like system built using descriptors, metaclasses, and a simple query builder.
 It supports model definitions, field validation, inheritance, serialization, and a basic SQL-like query layer.
 
+
+---
+
+## Quick start
+```python
+from tinybit import *
+
+class User(Model):
+    id = IntField()
+    name = CharField(max_length=20)
+
+configure(SQLiteBackend("app.db"), create_tables=True)
+
+user, _ = User.objects.create(
+    id=1,
+    name="John"
+)
+
+user.save()
+
+print(User.objects.all().get())
+```
+
 ---
 
 ## Features
@@ -21,7 +44,7 @@ It supports model definitions, field validation, inheritance, serialization, and
 
 ## Project Structure
 
-```text id="s1xq9m"
+```text
 project/
 │
 ├── core/
@@ -58,7 +81,7 @@ project/
 
 ## Installation
 
-```bash id="k8xw0p"
+```bash
 git clone <repo-url>
 cd <project-folder>
 pip install pytest
@@ -68,13 +91,13 @@ pip install pytest
 
 ## Running Tests
 
-```bash id="b9q1ds"
+```bash
 make test
 ```
 
 Verbose:
 
-```bash id="c0p8lw"
+```bash
 pytest -v
 ```
 
@@ -84,7 +107,7 @@ pytest -v
 
 ## Defining Models
 
-```python id="l2xv9a"
+```python
 from core.model.base import Model
 from core.field.fields import IntField, CharField
 
@@ -99,7 +122,7 @@ class User(Model):
 
 ## Creating Instances
 
-```python id="q7v0zd"
+```python
 user = User(id=1, name="Alice", age=25)
 print(user)
 ```
@@ -110,7 +133,7 @@ print(user)
 
 Validation is explicit using `full_clean()`:
 
-```python id="m3z8qa"
+```python
 user = User(id="bad", name="Alice")
 
 is_valid = user.full_clean()
@@ -123,7 +146,7 @@ print(user.errors)
 
 ## Saving
 
-```python id="r1k9cw"
+```python
 user.save()
 ```
 
@@ -133,13 +156,13 @@ Automatically validates before saving.
 
 ## Serialization
 
-```python id="n8p4sd"
+```python
 user.to_dict()
 ```
 
 Output:
 
-```python id="v2l0xn"
+```python
 {"id": 1, "name": "Alice", "age": 25}
 ```
 
@@ -163,7 +186,7 @@ Generates raw SQL-like strings from filters.
 
 Example output:
 
-```sql id="u2q1wm"
+```sql
 SELECT *
 FROM users
 WHERE id=1 name=Alice;
@@ -177,7 +200,7 @@ WHERE id=1 name=Alice;
 
 Responsible for constructing and caching queries.
 
-```python id="z9m2qa"
+```python
 qb = QueryBuilder(User, {"id": 1})
 print(qb.query)
 ```
@@ -194,7 +217,7 @@ Accessible via `Model.objects`.
 
 ### filter(**kwargs)
 
-```python id="c8n2pl"
+```python
 User.objects.filter(id=1, name="Alice")
 ```
 
@@ -202,7 +225,7 @@ Validates field names against model schema.
 
 Supports chaining:
 
-```python id="x0v9qa"
+```python
 User.objects.filter(id=1).filter(name="Alice")
 ```
 
@@ -212,13 +235,13 @@ User.objects.filter(id=1).filter(name="Alice")
 
 Builds and prints the SQL query:
 
-```python id="y9q3sd"
+```python
 User.objects.filter(id=1).get()
 ```
 
 Example output:
 
-```sql id="t8m1za"
+```sql
 SELECT *
 FROM users
 WHERE id=1;
@@ -230,7 +253,7 @@ WHERE id=1;
 
 Creates and validates a model instance:
 
-```python id="k2v8sn"
+```python
 user, is_valid = User.objects.create(id=1, name="Alice")
 ```
 
@@ -245,7 +268,7 @@ Returns:
 
 Returns the queryset unchanged:
 
-```python id="w1q9mz"
+```python
 User.objects.all()
 ```
 

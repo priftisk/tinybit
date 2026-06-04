@@ -9,6 +9,6 @@ def configure(backend, create_tables: bool = False) -> None:
     Model._db = backend
     if create_tables:
         for model_cls in Model._registry:
-            if model_cls._table == None:
+            if model_cls._table is None:
                 continue
             backend.create_table(model_cls)
