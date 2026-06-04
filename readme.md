@@ -1,27 +1,28 @@
-# Mini ORM
+# tinybit
 
-A lightweight Python ORM-like system built using descriptors, metaclasses, and a simple query builder.
-It supports model definitions, field validation, inheritance, serialization, and a basic SQL-like query layer.
-
+A lightweight Python ORM built using descriptors, metaclasses, and a query builder.
+It supports model definitions, field validation, inheritance, serialization, a SQLite backend, and CSV parsing utilities.
 
 ---
 
-## Quick start
-```python
-from tinybit import *
+## Quick Start
 
-class User(Model):
-    id = IntField()
-    name = CharField(max_length=20)
+```python
+from core.model.base import Model
+from core.field.fields import IntField, CharField
+from core.db.setup import configure
+from core.db.sqlite_backend import SQLiteBackend
 
 configure(SQLiteBackend("app.db"), create_tables=True)
 
-user, _ = User.objects.create(
-    id=1,
-    name="John"
-)
+class User(Model):
+    id = IntField()
+    name = CharField(max_length=120)
 
-user.save()
+user, is_valid = User.objects.create(id=1, name="Alice")
+
+if is_valid:
+    user.save()
 
 print(User.objects.all().get())
 ```
@@ -30,22 +31,24 @@ print(User.objects.all().get())
 
 ## Features
 
-* Declarative model system
-* Descriptor-based fields with validation
-* Explicit validation via `full_clean()`
-* Inheritance-aware models
-* Object manager (`objects`)
-* Query builder (`Query`, `QueryBuilder`, `QuerySet`)
-* SQL-like query generation (string-based)
-* Serialization via `to_dict()`
-* Pytest test suite
+- Declarative model system
+- Descriptor-based fields with validation
+- Explicit validation via `full_clean()`
+- Inheritance-aware models
+- Object manager (`objects`)
+- Query builder (`Query`, `QueryBuilder`, `QuerySet`)
+- SQLite backend with pluggable backend abstraction
+- `save()` persists instances to the configured database
+- CSV-to-model parsing via `model_from_csv()`
+- Serialization via `to_dict()`
+- Pytest test suite
 
 ---
 
 ## Project Structure
 
-```text
-project/
+```
+tinybit/
 │
 ├── core/
 │   ├── field/
@@ -63,6 +66,13 @@ project/
 │   │   ├── query_builder.py
 │   │   └── queryset.py
 │   │
+│   ├── db/
+│   │   ├── setup.py
+│   │   └── sqlite_backend.py
+│   │
+│   ├── util/
+│   │   └── parsers.py
+│   │
 │   └── exceptions/
 │       └── validation.py
 │
@@ -73,6 +83,8 @@ project/
 │   ├── test_inheritance.py
 │   ├── test_to_dict.py
 │   └── test_query.py
+│
+├── main.py
 ├── Makefile
 └── README.md
 ```
@@ -82,8 +94,8 @@ project/
 ## Installation
 
 ```bash
-git clone <repo-url>
-cd <project-folder>
+git clone https://github.com/priftisk/tinybit.git
+cd tinybit
 pip install pytest
 ```
 
@@ -103,33 +115,28 @@ pytest -v
 
 ---
 
-# Models
+## Models
 
-## Defining Models
+### Defining Models
 
 ```python
 from core.model.base import Model
 from core.field.fields import IntField, CharField
 
-
 class User(Model):
     id = IntField()
-    name = CharField(max_length=20)
+    name = CharField(max_length=120)
     age = IntField()
 ```
 
----
-
-## Creating Instances
+### Creating Instances
 
 ```python
 user = User(id=1, name="Alice", age=25)
 print(user)
 ```
 
----
-
-## Validation
+### Validation
 
 Validation is explicit using `full_clean()`:
 
@@ -142,114 +149,97 @@ print(user.is_valid)
 print(user.errors)
 ```
 
----
-
-## Saving
+### Saving
 
 ```python
-user.save()
+user.save()  # Persists to the configured database
 ```
 
 Automatically validates before saving.
 
----
-
-## Serialization
+### Serialization
 
 ```python
 user.to_dict()
+# {"id": 1, "name": "Alice", "age": 25}
 ```
 
-Output:
+---
+
+## Database Backend
+
+Configure a backend once at startup using `configure()`:
 
 ```python
-{"id": 1, "name": "Alice", "age": 25}
+from core.db.setup import configure
+from core.db.sqlite_backend import SQLiteBackend
+
+configure(SQLiteBackend("app.db"), create_tables=True)
 ```
 
----
-
-# Query System
-
-The ORM includes a lightweight SQL-like query builder.
-
-It is composed of:
-
-* `Query`
-* `QueryBuilder`
-* `QuerySet`
+Setting `create_tables=True` will create the database tables for all registered models automatically.
+Setting it to `False` assumes the tables already exist.
 
 ---
 
-## Query
+## Inheritance
 
-Generates raw SQL-like strings from filters.
-
-Example output:
-
-```sql
-SELECT *
-FROM users
-WHERE id=1 name=Alice;
-```
-
-> Note: string escaping and SQL injection protection are not implemented yet.
-
----
-
-## QueryBuilder (Currently unused)
-
-Responsible for constructing and caching queries.
+Models support field inheritance:
 
 ```python
-qb = QueryBuilder(User, {"id": 1})
-print(qb.query)
+class SuperUser(User):  # Inherits id and name from User
+    secret_code = CharField(default="admin")
+
+SuperUser.objects.filter(secret_code="admin", name="Alex").get()
 ```
 
-Lazy evaluation is used (query is built only when accessed).
+---
+
+## CSV Parsing
+
+The `model_from_csv` utility maps CSV rows to model instances:
+
+```python
+from core.util.parsers import model_from_csv
+
+class LogLine(Model):
+    datetime = CharField(max_length=100)
+    level = CharField(max_length=20)
+    message = CharField(max_length=255)
+
+for entry in model_from_csv(LogLine, "logs.csv"):
+    print(entry)
+# LogLine(datetime='2026-01-01 14:56:15', level='DEBUG', message='File deleted')
+```
 
 ---
 
-## QuerySet API
+## Query System
 
-Accessible via `Model.objects`.
+The ORM includes a lightweight SQL-like query builder composed of `Query` and `QuerySet`.
 
----
-
-### filter(**kwargs)
+### `filter(**kwargs)`
 
 ```python
 User.objects.filter(id=1, name="Alice")
 ```
 
-Validates field names against model schema.
-
-Supports chaining:
+Validates field names against the model schema. Supports chaining:
 
 ```python
 User.objects.filter(id=1).filter(name="Alice")
 ```
 
----
+### `get()`
 
-### get()
-
-Builds and prints the SQL query:
+Builds and executes the query:
 
 ```python
 User.objects.filter(id=1).get()
+# SELECT * FROM users WHERE id=1;
 ```
 
-Example output:
-
-```sql
-SELECT *
-FROM users
-WHERE id=1;
-```
-
----
-
-### create(**kwargs)
+### `create(**kwargs)`
 
 Creates and validates a model instance:
 
@@ -257,33 +247,23 @@ Creates and validates a model instance:
 user, is_valid = User.objects.create(id=1, name="Alice")
 ```
 
-Returns:
+Returns the instance and the validation result.
 
-* instance
-* validation result
+### `all()`
 
----
-
-### all()
-
-Returns the queryset unchanged:
+Returns the full queryset:
 
 ```python
 User.objects.all()
 ```
 
+> **Note:** SQL parameter binding and injection protection are not yet implemented.
+
 ---
 
 ## Current Limitations
 
-* No real database execution layer
-* No result hydration into models
-* No SQL parameter binding
-* No AND/OR grouping in filters
-* No column selection (currently always queries all columns)
-* No query result caching
-* No backend abstraction
-
-
-
-
+- No AND/OR grouping in filters
+- No column selection (always queries `SELECT *`)
+- No query result caching
+- No result hydration from database rows back into model instances
