@@ -1,6 +1,6 @@
 # tinybit
 
-A lightweight Python ORM built using descriptors, metaclasses, and a query builder.
+A zero-dependency Python ORM built using descriptors, metaclasses, and a query builder.
 It supports model definitions, field validation, inheritance, serialization, a SQLite backend, and CSV parsing utilities.
 
 ---
