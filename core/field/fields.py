@@ -17,7 +17,7 @@ class IntField(Field):
 
     def validate(self, value):
         if not isinstance(value, int):
-            raise TypeError("IntField must be int")
+            raise TypeError(f"IntField must be int. Found: {value}")
 
 
 class CharField(Field):
@@ -27,17 +27,17 @@ class CharField(Field):
 
     def validate(self, value):
         if not isinstance(value, str):
-            raise TypeError("Charfield must be str")
+            raise TypeError(f"Charfield must be str. Found: {value}")
         if len(value) > self.max_length:
             raise ValueError(
-                f"Value: {value} is too long for Charfield(max_length={self.max_length})"
+                f"Value: {value} is too long for Charfield({self.max_length})"
             )
 
 
 class FloatField(Field):
     def validate(self, value):
         if not isinstance(value, float):
-            raise TypeError("FloatField must be float")
+            raise TypeError(f"FloatField must be float.Found: {value}")
 
 
 class BoolField(Field):
@@ -46,4 +46,4 @@ class BoolField(Field):
 
     def validate(self, value):
         if not isinstance(value, bool):
-            raise TypeError("BoolField must be bool")
+            raise TypeError(f"BoolField must be bool.Found: {value}")
