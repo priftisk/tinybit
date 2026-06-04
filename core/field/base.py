@@ -7,7 +7,6 @@ class Field(ABC):
         self.nullable = nullable
 
     def __init_subclass__(cls):
-        super().__init_subclass__()
 
         if cls.validate is Field.validate:
             raise TypeError(f"{cls.__name__} must implement validate()")

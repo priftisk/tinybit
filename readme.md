@@ -236,7 +236,7 @@ Builds and executes the query:
 
 ```python
 User.objects.filter(id=1).get()
-# SELECT * FROM users WHERE id=1;
+# User(id=1, name="Alice")
 ```
 
 ### `create(**kwargs)`
