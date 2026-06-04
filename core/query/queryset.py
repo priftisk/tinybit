@@ -51,9 +51,8 @@ class QuerySet:
             {**row} for row in rows
         ]  # TODO For now it returns just a dict (Maybe wrap in something)
 
-    def only(self, *args):
-        return self._clone(_only=args)
-        # self._only.add(next(arg for arg in args))
+    def only(self, *cols):
+        return self._clone(_only=cols)
 
     def first(self):
         return self.all().get()[0]
