@@ -16,7 +16,13 @@ class User(Model):
     age = IntField()
 
 
+class Admin(User):  # Inherits fields from User class
+    _table = None  # Prevents table creation during backend configuration
+    admin_pass = CharField(default="admin", max_length=255)
+
+
 configure(SQLiteBackend("tinybit.db"), create_tables=True)
+
 
 all_users = User.objects.all()
 some_users = User.objects.filter(age=22)

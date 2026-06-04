@@ -1,41 +1,5 @@
 from core.field.base import Field
 
-# class ModelBase(type):
-#     """
-#     Metaclass that:
-#       1. Collects Field descriptors into cls._fields at class creation time.
-#       2. Registers every concrete subclass of Model in ModelMeta._registry
-#          so configure() can iterate them and create their tables automatically.
-#       3. Attaches an ObjectManager as cls.objects.
-#     """
-
-#     # All concrete Model subclasses register here at class-definition time.
-#     _registry: list = []
-
-#     def __new__(mcs, name, bases, namespace):
-#         fields = {
-#             key: value for key, value in namespace.items() if isinstance(value, Field)
-#         }
-
-#         inherited_fields = {}
-#         for base in bases:
-#             if hasattr(base, "_fields"):
-#                 inherited_fields.update(base._fields)
-
-#         namespace["_fields"] = {**inherited_fields, **fields}
-#         namespace.setdefault("_table", f"{name.lower()}s")
-
-#         cls = super().__new__(mcs, name, bases, namespace)
-
-#         if name != "Model":
-#             mcs._registry.append(cls)
-
-#             from core.object_manager.base import ObjectManager
-
-#             cls.objects = ObjectManager(cls)
-
-#         return cls
-
 
 class Model:
     _registry = []
@@ -61,7 +25,12 @@ class Model:
 
         if not hasattr(cls, "_table"):
             cls._table = f"{cls.__name__.lower()}s"
+        elif (
+            getattr(cls, "_table") == None
+        ):  # User explicitly set it None in their defined Model subclass(will be ignored during table creation)
+            cls._table = None
 
+        # Register class so it can be used to create tables in db
         Model._registry.append(cls)
 
         from core.object_manager.base import ObjectManager

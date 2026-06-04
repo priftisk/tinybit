@@ -28,6 +28,7 @@ class SQLiteBackend(DatabaseBackend):
         )
         table = model.__name__.lower() + "s"
         self.execute(f"CREATE TABLE IF NOT EXISTS {table} ({cols})")
+        print(f"Creating table for: {model.__name__}")
 
     def close(self) -> None:
         self.conn.close()
