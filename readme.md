@@ -36,7 +36,7 @@ print(User.objects.all().get())
 - Explicit validation via `full_clean()`
 - Inheritance-aware models
 - Object manager (`objects`)
-- Query builder (`Query`, `QueryBuilder`, `QuerySet`)
+- Query builder (`Query`, `QuerySet`)
 - SQLite backend with pluggable backend abstraction
 - `save()` persists instances to the configured database
 - CSV-to-model parsing via `model_from_csv()`
