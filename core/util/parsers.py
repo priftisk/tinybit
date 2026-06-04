@@ -19,7 +19,8 @@ def _map_to_model(model_cls, model_fields, args):
     yield new_cls
 
 
-# Creates a generator that yields each line of the csv as the desired model.
+# Creates a generator that converts each line 
+# of the csv to the desired model.
 def model_from_csv(model_cls, csv_path):
     if model_cls is Model:
         raise ValueError("Cannot use base Model.")
