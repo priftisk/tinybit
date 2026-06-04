@@ -36,11 +36,11 @@ class QuerySet:
 
         return [self.model(**row) for row in rows]
 
+    def first(self):
+        return self.all().get()[0]
+
     def all(self):
         return self._clone()
-
-    def execute(self):
-        return self._build_query()
 
     def create(self, **kwargs):
         obj = self.model(**kwargs)

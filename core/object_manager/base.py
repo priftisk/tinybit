@@ -5,9 +5,6 @@ class ObjectManager:
     def __init__(self, model=None):
         self.model = model
 
-    # def __get__(self, instance, owner):
-    #     return QuerySet(self.model)
-
     def filter(self, **kwargs) -> QuerySet:
         return QuerySet(self.model).filter(**kwargs)
 
