@@ -2,18 +2,30 @@ from core.query.query import Query
 
 
 class QuerySet:
-    def __init__(self, model, filters={}):
+    def __init__(self, model, filters={}, _only=set()):
         self.model = model
         self._filters = filters
+        self._only = _only
 
     # -------------------------
     # internal helper
     # -------------------------
     def _clone(self, **kwargs):
-        return QuerySet(self.model, {**self._filters, **kwargs})
+        included_cols = self._only
+
+        if (
+            "_only" in kwargs
+        ):  # Extract and remove it so it does not get added to the filters
+            included_cols = kwargs.get("_only", self._only)
+            _ = kwargs.pop("_only")
+        return QuerySet(
+            self.model,
+            {**self._filters, **kwargs},
+            included_cols,
+        )
 
     def _build_query(self):
-        return Query(self.model, self._filters)
+        return Query(self.model, self._filters, self._only)
 
     # -------------------------
     # public API
@@ -30,11 +42,17 @@ class QuerySet:
             raise RuntimeError(
                 f"No backend configured. Call configure() before querying {self.model.__name__}."
             )
+
         query = self._build_query()
-
         rows = db.execute(query.raw, tuple(self._filters.values()))
+        if self._only == set():  # All columns
+            return [self.model(**row) for row in rows]
+        return [
+            {**row} for row in rows
+        ]  # TODO For now it returns just a dict (Maybe wrap in something)
 
-        return [self.model(**row) for row in rows]
+    def only(self, *cols):
+        return self._clone(_only=cols)
 
     def first(self):
         return self.all().get()[0]
